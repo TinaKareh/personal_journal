@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+
+enum DeletionStatus {
+  DELETED
+  NOT_DELETED
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum ReminderType {
+   GENTLE
+   PASSIVE_AGGRESSIVE
+   NONCHALANT
+}
+
+model JournalEntry {
+  id  Int @id @default(autoincrement())
+  title String
+  content String
+  categoryId Int
+  category  Category @relation(fields: [category], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Foreign Key
+  userId    Int
+  user      User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+   @@map("journal_entry") // Renames the table in the database
+}
+
+model User {
+
+  id           Int         @id @default(autoincrement())
+  firstName    String
+  lastName     String
+  email        String    @unique
+  password     String
+  gender       Gender
+  dateOfBirth  DateTime
+  role         Role        @default(USER)   // Role field to differentiate user types
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  journalEntries JournalEntry[]
+  preferences     UserPreference[]
+  categories  Category[]
+}
+
+model UserPreference {
+  id        Int   @id @default(autoincrement())
+  userId    Int
+  categoryId Int
+  category  Category @relation(fields: [category], references: [id], onDelete: Cascade)
+  color     String   // Hex color code
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category]) // Ensures one preference per category per user
+
+   @@map("user_preference") // Renames the table in the database
+}
+
+model Category {
+  id        Int   @id @default(autoincrement())
+  userId    Int
+  name      String 
+  deletionStatus DeletionStatus
+
+   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+}
+
+model Reminder {
+  id        Int   @id @default(autoincrement())
+  type      ReminderType
+  time      DateTime
+  day       String
+  userId    Int
+  deletionStatus DeletionStatus
+
+   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
