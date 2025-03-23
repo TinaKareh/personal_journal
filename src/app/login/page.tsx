@@ -1,6 +1,7 @@
 "use client";  
 
 import React, { useState } from 'react';
+import { useRouter } from "next/navigation";
 
 type FormData = {
   email: string;
@@ -13,6 +14,9 @@ const Login = () => {
     password: '',
   });
 
+  const [errorMsg, setErrorMsg] = useState("");
+  const router = useRouter();
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -21,14 +25,48 @@ const Login = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic (API call to verify credentials)
-    console.log('Logging in:', formData);
+    setErrorMsg("");
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        console.log("Login successful:", data);
+        setTimeout(() => {
+          if (data.user.role === "USER") {
+            console.log("Redirecting to dashboard...");
+            router.push("/dashboard");
+          } else {
+            router.push("/");
+          }
+        }, 100);
+      } else {
+        setErrorMsg(data.error || "Login failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setErrorMsg("Network error. Please try again.");
+    }
   };
 
   return (
-    <div className="min-h-screen bg-[#0E0F1C] text-white flex items-center justify-center p-6">
+    <div className="bg-[#0E0F1C] text-white min-h-screen">
+    {/* Navbar */}
+    <nav className="flex justify-between items-center p-6">
+    <h1 className="text-2xl sm:text-4xl font-semibold">
+          Journal me <span className="text-green-500">●</span>
+        </h1>
+    </nav>
+    <div className="min-h-screen bg-[#0E0F1C] text-white flex items-center justify-center p-2">
       <div className="bg-[#181c29] p-8 rounded-lg shadow-md max-w-md w-full">
         <h2 className="text-3xl font-semibold text-center mb-6">
           Welcome <span className="text-blue-400">baaaaaack</span> 🐶
@@ -70,6 +108,13 @@ const Login = () => {
               />
             </div>
 
+             {/* Error Message */}
+        {errorMsg && (
+          <div className="text-red-400 text-sm text-center mb-4">
+            {errorMsg}
+          </div>
+        )}
+
             {/* Log In Button */}
             <button
               type="submit"
@@ -88,6 +133,7 @@ const Login = () => {
           </a>
         </p>
       </div>
+    </div>
     </div>
   );
 };

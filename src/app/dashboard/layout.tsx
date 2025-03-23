@@ -7,6 +7,7 @@ import InsightsModal from "../components/insights";
 import TravelModal from "../components/travel";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,6 +18,8 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+
 
 export default function RootLayout({
   children,
@@ -52,12 +55,29 @@ export default function RootLayout({
     setIsTimeTravelModalOpen(false); // Close Time Travel Modal
   };
 
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("/api/auth/logout", {
+        method: "POST",
+      });
+
+      if (res.ok) {
+        router.push("/login"); 
+      } else {
+        console.error("Logout failed");
+      }
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
+
   // Mock journal entries or pass an actual array of journal entry dates
   const journalEntries = ["2024-03-10", "2024-03-12", "2024-03-15"];
 
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <div className="bg-[#0E0F1C] text-white min-h-screen">
         {/* Navigation Bar */}
         <header className="flex justify-between items-center p-6 bg-[#181c29] text-white">
           <h1 className="text-4xl font-semibold">
@@ -83,7 +103,7 @@ export default function RootLayout({
             >
               Alexander
             </button>
-            <button className="bg-gray-800 text-white px-4 py-2 rounded-lg">Logout</button>
+            <button onClick={handleLogout} className="bg-gray-800 text-white px-4 py-2 rounded-lg">Logout</button>
           </div>
         </header>
         {/* Main Content */}
@@ -100,7 +120,6 @@ export default function RootLayout({
             onClose={handleCloseTimeTravelModal}
             journalEntries={journalEntries} // Pass the journal entries to the modal
           />
-      </body>
-    </html>
+          </div>
   );
 }

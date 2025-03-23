@@ -26,9 +26,11 @@ export default function Home() {
         <p className="text-white-1000 mt-6">
           Capture the ups and downs, the laughs and tears, the moments of hope and sorrow and <br/> everything in between in a way only you can.
         </p>
+        <Link href="/login">
         <button className="mt-10 px-6 py-3 bg-blue-800 rounded-lg">
           Start writing today
         </button>
+        </Link>
       </section>
 
       {/* Journal Entries */}

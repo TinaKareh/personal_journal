@@ -41,7 +41,7 @@ model JournalEntry {
   title String
   content String
   categoryId Int
-  category  Category @relation(fields: [category], references: [id], onDelete: Cascade)
+  category  Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -59,37 +59,28 @@ model User {
   lastName     String
   email        String    @unique
   password     String
-  gender       Gender
-  dateOfBirth  DateTime
+  gender       Gender?
+  dateOfBirth  DateTime?
   role         Role        @default(USER)   // Role field to differentiate user types
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
   journalEntries JournalEntry[]
-  preferences     UserPreference[]
   categories  Category[]
+  reminders Reminder[] 
 }
 
-model UserPreference {
-  id        Int   @id @default(autoincrement())
-  userId    Int
-  categoryId Int
-  category  Category @relation(fields: [category], references: [id], onDelete: Cascade)
-  color     String   // Hex color code
-
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, category]) // Ensures one preference per category per user
-
-   @@map("user_preference") // Renames the table in the database
-}
 
 model Category {
   id        Int   @id @default(autoincrement())
   userId    Int
   name      String 
+  color     String   // Hex color code
   deletionStatus DeletionStatus
 
    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+   journalEntries JournalEntry[] 
+
 
 }
 
