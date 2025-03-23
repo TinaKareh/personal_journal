@@ -20,37 +20,42 @@ export default async function handler(req, res) {
   const userId = user.id;
 
   try {
-    // Get all categories that are either user-owned or default
+    // Get user + default categories that are NOT deleted
     const categories = await prisma.category.findMany({
       where: {
+        deletionStatus: 'NOT_DELETED',
         OR: [
           { userId: userId },
-          { userId: null }, // default categories
+          { userId: null }, // Default categories
         ],
       },
       orderBy: { name: 'asc' },
     });
 
-    // For each category, count the journal entries linked to it by the current user
+    // Attach journal entry count per category for this user
     const categoriesWithCount = await Promise.all(
       categories.map(async (category) => {
-        const entryCount = await prisma.journalEntry.count({
+        const count = await prisma.journalEntry.count({
           where: {
             categoryId: category.id,
-            userId: userId, // only count entries belonging to this user
+            userId: userId, // Only this user's entries
           },
         });
 
         return {
-          ...category,
-          entryCount,
+          id: category.id,
+          name: category.name,
+          color: category.color,
+          userId: category.userId,
+          deletionStatus: category.deletionStatus,
+          count: count ?? 0,
         };
       })
     );
 
     return res.status(200).json(categoriesWithCount);
   } catch (err) {
-    console.error(err);
+    console.error('❌ Failed to load categories with entry counts:', err);
     return res.status(500).json({ error: 'Failed to load categories with entry counts' });
   }
 }

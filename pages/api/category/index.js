@@ -14,6 +14,8 @@ export default async function handler(req, res) {
   } catch (err) {
     return res.status(401).json({ error: 'Invalid token' });
   }
+  console.log("Decoded user:", user);
+
 
   const userId = user.id;
 
@@ -22,13 +24,19 @@ export default async function handler(req, res) {
     case 'GET': {
       try {
         const categories = await prisma.category.findMany({
-          where: { userId },
+          where: {
+            deletionStatus: 'NOT_DELETED',
+            OR: [
+              { userId: userId },   // User-specific categories
+              { userId: null },     // Default categories
+            ],
+          },
           orderBy: { name: 'asc' },
-        });
+        });        
 
         return res.status(200).json(categories);
       } catch (err) {
-        console.error(err);
+        console.error('❌ Error fetching categories:', err);
         return res.status(500).json({ error: 'Error fetching categories' });
       }
     }

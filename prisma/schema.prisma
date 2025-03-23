@@ -38,8 +38,8 @@ enum ReminderType {
 
 model JournalEntry {
   id  Int @id @default(autoincrement())
-  title String
-  content String
+  title     String   @db.Text  // allows long titles
+  content   String   @db.LongText // allows very large content
   categoryId Int
   category  Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
@@ -72,16 +72,14 @@ model User {
 
 model Category {
   id        Int   @id @default(autoincrement())
-  userId    Int
+  userId    Int?
   name      String 
   color     String   // Hex color code
   deletionStatus DeletionStatus
 
-   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+   user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
    journalEntries JournalEntry[] 
-
-
 }
 
 model Reminder {

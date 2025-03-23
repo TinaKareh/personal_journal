@@ -20,8 +20,28 @@ export default async function handler(req, res) {
   switch (req.method) {
     //view entries (with optional filters: categoryId, dates, pagination)
     case 'GET': {
-      const { categoryId, startDate, endDate, page = 1, limit = 10 } = req.query;
-
+      const { id, categoryId, startDate, endDate, page = 1, limit = 10 } = req.query;
+    
+      // ✅ If an ID is provided, return a single entry
+      if (id) {
+        const entry = await prisma.journalEntry.findFirst({
+          where: {
+            id: parseInt(id),
+            userId,
+          },
+          include: {
+            category: true,
+          },
+        });
+    
+        if (!entry) {
+          return res.status(404).json({ error: "Entry not found" });
+        }
+    
+        return res.status(200).json(entry);
+      }
+    
+      // ✅ Otherwise return paginated list
       const entries = await prisma.journalEntry.findMany({
         where: {
           userId,
@@ -33,13 +53,17 @@ export default async function handler(req, res) {
             },
           }),
         },
+        include: {
+          category: true,
+        },
         skip: (parseInt(page) - 1) * parseInt(limit),
         take: parseInt(limit),
         orderBy: { createdAt: 'desc' },
       });
-
+    
       return res.status(200).json(entries);
     }
+    
 
     // Add a new entry
     case 'POST': {
@@ -61,12 +85,13 @@ export default async function handler(req, res) {
     case 'PUT': {
       const { id, title, content, categoryId } = req.body;
 
-      const updated = await prisma.journalEntry.updateMany({
-        where: { id: parseInt(id), userId },
+      const updated = await prisma.journalEntry.update({
+        where: { id: parseInt(id) },
         data: { title, content, categoryId },
-      });
+        include: { category: true },
+      });      
 
-      return res.status(200).json({ updated });
+      return res.status(200).json( updated );
     }
 
     // Delete an entry by ID
