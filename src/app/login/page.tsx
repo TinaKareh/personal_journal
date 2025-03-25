@@ -60,7 +60,6 @@ const Login = () => {
 
   return (
     <div className="bg-[#0E0F1C] text-white min-h-screen">
-    {/* Navbar */}
     <nav className="flex justify-between items-center p-6">
     <h1 className="text-2xl sm:text-4xl font-semibold">
           Journal me <span className="text-green-500">●</span>
@@ -76,7 +75,6 @@ const Login = () => {
         </p>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
-            {/* Email Address */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium">
                 Email Address
@@ -92,7 +90,6 @@ const Login = () => {
               />
             </div>
 
-            {/* Password */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium">
                 Password
@@ -108,14 +105,12 @@ const Login = () => {
               />
             </div>
 
-             {/* Error Message */}
         {errorMsg && (
           <div className="text-red-400 text-sm text-center mb-4">
             {errorMsg}
           </div>
         )}
 
-            {/* Log In Button */}
             <button
               type="submit"
               className="w-full py-3 mt-6 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors"
@@ -125,7 +120,6 @@ const Login = () => {
           </div>
         </form>
 
-        {/* Sign-up Link */}
         <p className="mt-4 text-center text-sm text-gray-400">
           Don't have an account?{' '}
           <a href="/register" className="text-blue-400 hover:underline">

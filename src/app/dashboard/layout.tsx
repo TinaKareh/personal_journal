@@ -1,20 +1,16 @@
-"use client"; // Mark this as a Client Component because we're using React hooks
+"use client"; 
 
 import { Geist, Geist_Mono } from "next/font/google";
 import { useState, useRef, useEffect } from "react";
 import Modal from "../components/page";
 import InsightsModal from "../components/insights";
 import TravelModal from "../components/travel";
-import Dashboard from "../dashboard/page"; // Import the Dashboard
-import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   CalendarDaysIcon,
   ChartBarIcon,
   UserIcon,
 } from "@heroicons/react/24/outline";
-import { jwtDecode } from "jwt-decode"; 
 
 
 export function useUsernameFromToken() {
@@ -36,28 +32,17 @@ export function useUsernameFromToken() {
   return username;
 }
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
 
-  const [categories, setCategories] = useState([]); // Categories state lifted here
   const username = useUsernameFromToken();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isInsightsModalOpen, setIsInsightsModalOpen] = useState(false); // State for Insights Modal
-  const [isTimeTravelModalOpen, setIsTimeTravelModalOpen] = useState(false); // State for Time Travel Modal
-  const buttonRef = useRef(null); // Reference for the Time Travel button
+  const [isInsightsModalOpen, setIsInsightsModalOpen] = useState(false); 
+  const [isTimeTravelModalOpen, setIsTimeTravelModalOpen] = useState(false); 
+  const buttonRef = useRef(null); 
 
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   
@@ -71,19 +56,19 @@ export default function RootLayout({
   };
 
   const handleOpenInsightsModal = () => {
-    setIsInsightsModalOpen(true); // Open Insights Modal
+    setIsInsightsModalOpen(true); 
   };
 
   const handleCloseInsightsModal = () => {
-    setIsInsightsModalOpen(false); // Close Insights Modal
+    setIsInsightsModalOpen(false); 
   };
 
   const handleOpenTimeTravelModal = () => {
-    setIsTimeTravelModalOpen(true); // Open Time Travel Modal
+    setIsTimeTravelModalOpen(true); 
   };
 
   const handleCloseTimeTravelModal = () => {
-    setIsTimeTravelModalOpen(false); // Close Time Travel Modal
+    setIsTimeTravelModalOpen(false); 
   };
 
   const router = useRouter();
@@ -104,7 +89,6 @@ export default function RootLayout({
     }
   };
 
-  // Mock journal entries or pass an actual array of journal entry dates
   const journalEntries = [
     "2025-03-02",
     "2025-03-06",
@@ -115,7 +99,6 @@ export default function RootLayout({
 
   return (
     <div className="bg-[#0E0F1C] text-white min-h-screen">
-      {/* Navigation Bar */}
       <header className="flex justify-between items-center p-6 bg-[#181c29] text-white">
         <h1 className="text-4xl font-semibold">
           Journal me <span className="text-green-500">●</span>
@@ -167,23 +150,19 @@ export default function RootLayout({
           </div>
         </div>
       </header>
-      {/* Main Content */}
       <main>{children}</main>
 
-      {/* Modal for Account Settings */}
       <Modal isOpen={isModalOpen} onClose={handleCloseModal}/>
 
-      {/* Modal for Insights */}
       <InsightsModal
         isOpen={isInsightsModalOpen}
         onClose={handleCloseInsightsModal}
       />
 
-      {/* Modal for Time Travel */}
       <TravelModal
         isOpen={isTimeTravelModalOpen}
         onClose={handleCloseTimeTravelModal}
-        journalEntries={journalEntries} // Pass the journal entries to the modal
+        journalEntries={journalEntries} 
       />
     </div>
   );

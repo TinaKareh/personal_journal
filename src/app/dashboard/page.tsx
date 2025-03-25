@@ -1,4 +1,4 @@
-"use client"; // Mark this as a Client Component because we're using React hooks
+"use client"; 
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
@@ -45,7 +45,6 @@ const Dashboard = () => {
 
   const router = useRouter();
 
-  // Function to fetch categories and update the category count
   const fetchCategories = async () => {
     try {
       const res = await fetch("/api/category/count", {
@@ -63,9 +62,8 @@ const Dashboard = () => {
     }
   };
 
-  // Fetch categories when the component mounts
   useEffect(() => {
-    fetchCategories(); // This ensures categories are fetched on initial load
+    fetchCategories(); 
   }, []);
 
   useEffect(() => {
@@ -146,10 +144,8 @@ const Dashboard = () => {
         setIsWriting(false);
         setTimeout(() => setSuccessMsg(""), 3000);
 
-        // Re-fetch categories to update the count after saving a new entry
         fetchCategories();
 
-        // Clear selected category filter after saving an entry
         setSelectedCategoryId(null);
       } else {
         console.error("Failed to save");
@@ -199,7 +195,6 @@ const Dashboard = () => {
 
   return (
     <div className="bg-[#0E0F1C] text-white min-h-screen p-30">
-      {/* Start Writing Section */}
       <section className="text-center mb-8">
         <h2 className="text-6xl font-semibold">Start writing your stories</h2>
         {!isWriting ? (
@@ -211,7 +206,6 @@ const Dashboard = () => {
           />
         ) : (
           <div className="bg-[#181c29] p-6 rounded-lg shadow-md max-w-2xl mx-auto space-y-4">
-            {/* Title input */}
             <input
               type="text"
               value={title}
@@ -220,7 +214,6 @@ const Dashboard = () => {
               className="w-full p-3 bg-[#22242b] border border-[#333] text-white rounded-md"
             />
 
-            {/* Content textarea */}
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -229,7 +222,6 @@ const Dashboard = () => {
               className="w-full p-3 bg-[#22242b] border border-[#333] text-white rounded-md"
             />
 
-            {/* Category selector */}
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
@@ -243,7 +235,6 @@ const Dashboard = () => {
               ))}
             </select>
 
-            {/* Save and Cancel */}
             <div className="flex justify-between gap-4">
               <button
                 onClick={handleSaveEntry}
@@ -267,7 +258,6 @@ const Dashboard = () => {
         )}
       </section>
 
-      {/* Filters */}
       <section className="flex justify-center mb-8 gap-4 flex-wrap">
         {categories.map((cat) => (
           <button
@@ -293,7 +283,6 @@ const Dashboard = () => {
         ))}
       </section>
 
-      {/* Clear Filters Link */}
       <section className="text-center mb-8">
         <button
           onClick={handleClearFilters}
@@ -303,7 +292,6 @@ const Dashboard = () => {
         </button>
       </section>
 
-      {/* Entries List */}
       <section>
         {loading ? (
           <div className="flex justify-center items-center">
@@ -330,7 +318,6 @@ const Dashboard = () => {
                 className="bg-[#181c29] p-6 rounded-lg shadow-md hover:shadow-lg transition-all relative"
               >
                 <div className="absolute top-3 right-3 flex flex-col items-end space-y-2">
-                  {/* Icons */}
                   <div className="flex space-x-3">
                     <button
                       onClick={() =>
@@ -397,11 +384,10 @@ const Dashboard = () => {
                     </div>
                   </div>
 
-                  {/* Category name (colored text) */}
                   {entry.category && (
                     <div className="flex items-center justify-end space-x-1">
                       <TagIcon
-                        className="w-4 h-4 stroke-[5]" // makes the outline bolder
+                        className="w-4 h-4 stroke-[5]" 
                         style={{ color: entry.category.color }}
                       />
                       <span
@@ -414,15 +400,12 @@ const Dashboard = () => {
                   )}
                 </div>
 
-                {/* Date */}
                 <p className="text-sm text-gray-400 mb-6">{entry.date}</p>
 
-                {/* Title */}
                 <h3 className="text-xl sm:text-xl md:text-2xl lg:text-3xl font-semibold mb-3 overflow-hidden text-ellipsis whitespace-normal line-clamp-2">
                   {entry.title}
                 </h3>
 
-                {/* Content Preview */}
                 <p className="text-gray-300 text-sm line-clamp-3 overflow-hidden text-ellipsis">
                   {entry.content}
                 </p>

@@ -1,8 +1,7 @@
-"use client"; // Mark this as a Client Component because we're using React hooks
+"use client"; 
 
 import React, { useState } from "react";
 import Calendar from "react-calendar";
-// import "react-calendar/dist/Calendar.css"; // Import CSS for styling the calendar
 import { Value } from "react-calendar/src/shared/types.js";
 
 const TravelModal = ({
@@ -14,32 +13,28 @@ const TravelModal = ({
   onClose: () => void;
   journalEntries: string[];
 }) => {
-  const [date, setDate] = useState<Value>(new Date()); // Handle date change with correct type
+  const [date, setDate] = useState<Value>(new Date()); 
 
-  // Function to disable future dates
   const disableFutureDates = ({ date }: { date: Date }) => {
     const today = new Date();
-    return date > today; // Disable future dates
+    return date > today; 
   };
 
-  // Function to highlight days with entries
   const tileClassName = ({ date }: { date: Date }) => {
-    const formattedDate = date.toISOString().split("T")[0]; // Convert to YYYY-MM-DD format
+    const formattedDate = date.toISOString().split("T")[0]; 
     return journalEntries.some((entry) => entry === formattedDate)
       ? "highlight"
-      : ""; // Highlight if any entry exists
+      : ""; 
   };
 
-  // Handle onChange with the correct type (single Date, range of Dates, or null)
   const handleDateChange = (value: Value) => {
     setDate(value);
   };
 
-  if (!isOpen) return null; // Don't render the modal if it's not open
+  if (!isOpen) return null; 
 
   return (
     <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
-      {/* Modal Content */}
       <div className="bg-[#1a1c29] p-6 rounded-lg w-[400px] h-[400px] relative">
         <div className="flex justify-between items-center mb-6">
           <div className="flex flex-col items-start">
@@ -55,14 +50,13 @@ const TravelModal = ({
           </div>
         </div>
 
-        {/* Calendar */}
         <div className="calendar-container">
           <Calendar
             onChange={handleDateChange}
             value={date}
-            tileClassName={tileClassName} // Apply tile class for entries
-            tileDisabled={disableFutureDates} // Disable future dates
-            className="calendar-custom" // Custom class to apply custom styles
+            tileClassName={tileClassName} 
+            tileDisabled={disableFutureDates} 
+            className="calendar-custom" 
           />
         </div>
       </div>

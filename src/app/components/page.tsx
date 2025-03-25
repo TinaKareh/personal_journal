@@ -1,4 +1,4 @@
-"use client"; // Mark this as a Client Component because we're using React hooks
+"use client";
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
@@ -13,13 +13,13 @@ const Modal = ({
   onClose: () => void;
 }) => {
   const [activeTab, setActiveTab] = useState("personalDetails");
-  const [isEditing, setIsEditing] = useState(false); // State for editing personal details
-  const [isAddingReminder, setIsAddingReminder] = useState(false); // State to toggle the reminder form
-  const [reminderTime, setReminderTime] = useState<string>(""); // for time input
-  const [reminderType, setReminderType] = useState<string>("GENTLE"); // for the type select dropdown
-  const [selectedDays, setSelectedDays] = useState<string[]>([]); // for the days checkboxes
-  const [selectedIds, setSelectedIds] = useState<number[]>([]); // for the days checkboxes
-  const [editingReminder, setEditingReminder] = useState<number[] | null>(null); // To track which reminder is being edited
+  const [isEditing, setIsEditing] = useState(false); 
+  const [isAddingReminder, setIsAddingReminder] = useState(false); 
+  const [reminderTime, setReminderTime] = useState<string>("");
+  const [reminderType, setReminderType] = useState<string>("GENTLE"); 
+  const [selectedDays, setSelectedDays] = useState<string[]>([]); 
+  const [selectedIds, setSelectedIds] = useState<number[]>([]); 
+  const [editingReminder, setEditingReminder] = useState<number[] | null>(null); 
   const [categories, setCategories] = useState<any[]>([]);
   const [newCategoryName, setNewCategoryName] = useState<string>("");
   const [newCategoryColor, setNewCategoryColor] = useState<string>("#000000");
@@ -32,7 +32,7 @@ const Modal = ({
   const [showReminderDeleteConfirm, setReminderShowDeleteConfirm] =
     useState(false);
   const [reminderToDelete, setReminderToDelete] = useState<number | null>(null);
-  const [isAddingCategory, setIsAddingCategory] = useState(false); // State to toggle the category form
+  const [isAddingCategory, setIsAddingCategory] = useState(false); 
   const [selectedReminderIds, setSelectedReminderIds] = useState<number[]>([]);
   const router = useRouter();
 
@@ -61,7 +61,7 @@ const Modal = ({
   };
 
   type GroupedReminders = {
-    [key: string]: Reminder[]; // key is 'time|type', value is an array of reminders
+    [key: string]: Reminder[]; 
   };
 
   const [reminders, setReminders] = useState<Reminder[]>([]);
@@ -98,7 +98,7 @@ const Modal = ({
     }
   }, [isOpen]);
 
-  if (!isOpen) return null; // Don't render the modal if it's not open
+  if (!isOpen) return null; 
 
   const handleDayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = e.target;
@@ -204,13 +204,13 @@ const Modal = ({
       const res = await fetch(`/api/user/reminder`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: selectedReminderIds }), // Send the list of ids in the request body
+        body: JSON.stringify({ ids: selectedReminderIds }), 
       });
 
       if (res.ok) {
         setReminders((prev) =>
           prev.filter((r) => !selectedReminderIds.includes(r.id))
-        ); // Remove deleted reminders from the list
+        ); 
         setReminderShowDeleteConfirm(false);
         setSelectedReminderIds([]);
       } else {
@@ -233,7 +233,6 @@ const Modal = ({
 
     try {
       if (isEditingCategory) {
-        // Update category if editing
         const res = await fetch(`/api/category`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -274,8 +273,8 @@ const Modal = ({
     setEditingCategoryId(category.id);
     setNewCategoryName(category.name);
     setNewCategoryColor(category.color);
-    setIsEditingCategory(true); // Switch to edit mode
-    setIsAddingCategory(true); // Show form for editing
+    setIsEditingCategory(true); 
+    setIsAddingCategory(true); 
   };
 
   const handleDeleteCategory = async () => {
@@ -333,7 +332,7 @@ const Modal = ({
       });
 
       if (res.ok) {
-        setIsEditing(false); // Exit edit mode
+        setIsEditing(false); 
       } else {
         console.error("Update failed");
       }
@@ -344,19 +343,17 @@ const Modal = ({
 
   const groupReminders = (reminders: Reminder[]): GroupedReminders => {
     return reminders.reduce((acc: GroupedReminders, reminder: Reminder) => {
-      const key = `${reminder.time}|${reminder.type}`; // Combine time and type as key
+      const key = `${reminder.time}|${reminder.type}`; 
       if (!acc[key]) {
         acc[key] = [];
       }
-      acc[key].push(reminder); // Add reminder to the group
+      acc[key].push(reminder); 
       return acc;
     }, {});
   };
 
-  // Group the reminders when data is fetched
   const groupedReminders = groupReminders(reminders);
 
-  // Render modal for confirmation on deletion
   const renderDeleteConfirm = () => (
     <div className="absolute right-0 top-100 mt-2 bg-[#1a1c29] p-4 rounded-lg w-[300px] z-14">
       <p className="text-white text-sm">
@@ -403,9 +400,7 @@ const Modal = ({
 
   return (
     <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
-      {/* Modal Content */}
       <div className="bg-[#1a1c29] p-8 rounded-lg w-[800px] relative">
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-white text-xl"
@@ -463,23 +458,18 @@ const Modal = ({
                 </h2>
               </div>
 
-              {/* Edit Button on the right */}
               <div>
                 <button
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                  onClick={() => setIsEditing((prev) => !prev)} // Toggle edit mode
+                  onClick={() => setIsEditing((prev) => !prev)} 
                 >
                   {isEditing ? "Cancel" : "Edit personal details"}
                 </button>
               </div>
             </div>
-            {/* Form with Fields */}
             <form onSubmit={handleSaveChanges}>
-              {/* Fields Wrapper with Flexbox for Two Columns */}
               <div className="flex mb-4">
-                {/* Left Column (First Name and Gender) */}
                 <div className="w-1/2 pr-2">
-                  {/* First Name Field */}
                   <div className="mb-4">
                     <label className="text-white block mb-2">First name</label>
                     <input
@@ -490,11 +480,10 @@ const Modal = ({
                       }
                       className="w-full p-2 mt-2 bg-[#22242b] text-white border border-white rounded-lg"
                       placeholder="First name"
-                      disabled={!isEditing} // Disable if not editing
+                      disabled={!isEditing} 
                     />
                   </div>
 
-                  {/* Gender Field */}
                   <div className="mb-4">
                     <label className="text-white block mb-2">Gender</label>
                     <select
@@ -513,9 +502,7 @@ const Modal = ({
                   </div>
                 </div>
 
-                {/* Right Column (Last Name and Date of Birth) */}
                 <div className="w-1/2 pl-2">
-                  {/* Last Name Field */}
                   <div className="mb-4">
                     <label className="text-white block mb-2">Last name</label>
                     <input
@@ -530,7 +517,6 @@ const Modal = ({
                     />
                   </div>
 
-                  {/* Date of Birth Field */}
                   <div className="mb-4">
                     <label className="text-white block mb-2">
                       Date of birth
@@ -548,14 +534,13 @@ const Modal = ({
                 </div>
               </div>
 
-              {/* Save Changes Button */}
               <div className="mb-4">
                 <button
                   type="submit"
                   className={`w-1/4 p-2 mt-4 ${
                     isEditing ? "bg-blue-600" : "bg-gray-600"
                   } text-white rounded-lg`}
-                  disabled={!isEditing} // Disable if not editing
+                  disabled={!isEditing} 
                 >
                   Save changes
                 </button>
@@ -573,27 +558,23 @@ const Modal = ({
                 </h2>
               </div>
 
-              {/* Edit Button on the right */}
               {!isAddingReminder && (
                 <div className="flex items-center gap-4">
                   {" "}
-                  {/* Added gap for spacing */}
                   <button
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-[200px]"
-                    onClick={() => setIsAddingReminder(true)} // Show form to add reminder
+                    onClick={() => setIsAddingReminder(true)} 
                   >
                     Add a reminder
                   </button>
                 </div>
               )}
 
-              {/* Cancel Button */}
               {isAddingReminder && (
                 <div className="flex items-center gap-4">
                   {" "}
-                  {/* Added gap for spacing */}
                   <button
-                    onClick={() => setIsAddingReminder(false)} // Cancel adding reminder
+                    onClick={() => setIsAddingReminder(false)} 
                     className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 w-[200px]" // Same width as the Add button
                   >
                     Cancel
@@ -602,19 +583,15 @@ const Modal = ({
               )}
             </div>
 
-            {/* List of Reminders */}
             {!isAddingReminder && (
               <ul className="mb-4">
                 {reminders.length > 0 ? (
                   Object.entries(groupedReminders).map(([key, grouped]) => {
-                    // Get time and type from the grouped reminder key
                     const [time, type] = key.split("|");
 
-                    // Combine days into a single string
                     const days = grouped.map((r) => r.day).join(", ");
                     const day = grouped.map((r) => r.day);
                     const ids = grouped.map((r) => r.id);
-                    // setSelectedReminderIds(ids);
 
                     return (
                       <li
@@ -626,18 +603,17 @@ const Modal = ({
                         </span>
                         <div className="flex gap-2 items-center">
                           {" "}
-                          {/* Added Flexbox container */}
                           <button
                             onClick={() =>
                               handleEditReminder(ids, type, time, day)
-                            } // Add the appropriate handler for editing
+                            } 
                             className="text-white-500 flex items-center"
                           >
                             <PencilIcon className="h-5 w-5 mr-2" />
                             Edit
                           </button>
                           <button
-                            onClick={() => handleDeleteReminderClick(ids)} // Trigger delete confirmation modal
+                            onClick={() => handleDeleteReminderClick(ids)}
                             className="text-white-500 flex items-center"
                           >
                             <TrashIcon className="h-5 w-5 mr-2" />
@@ -650,7 +626,7 @@ const Modal = ({
                 ) : (
                   <div className="flex flex-col items-center justify-center text-center">
                     <Image
-                      src="/images/reminder.png" // Path to the image inside the public folder
+                      src="/images/reminder.png" 
                       alt="Reminder"
                       width={200}
                       height={200}
@@ -666,7 +642,7 @@ const Modal = ({
               </ul>
             )}
 
-            {/* Form to add a reminder */}
+            
             {isAddingReminder && (
               <form onSubmit={handleAddOrUpdateReminder}>
                 <div className="flex mb-4">
@@ -760,34 +736,29 @@ const Modal = ({
               </button>
             </div>
 
-            {/* Category Form */}
             {isAddingCategory && (
               <form onSubmit={handleSaveCategory}>
-                {/* Category Name Input */}
                 <div className="mt-4">
                   <label className="text-white">Category Name</label>
                   <input
                     type="text"
                     value={newCategoryName}
-                    onChange={(e) => setNewCategoryName(e.target.value)} // Handle text change
+                    onChange={(e) => setNewCategoryName(e.target.value)} 
                     className="w-full p-2 mt-2 bg-[#22242b] text-white border border-white rounded-lg"
                   />
                 </div>
 
-                {/* Category Color Picker */}
                 <div className="mt-4">
                   <label className="text-white">Category Color</label>
                   <input
                     type="color"
-                    value={newCategoryColor} // Bind this value to the state
-                    onChange={(e) => setNewCategoryColor(e.target.value)} // Update state when color changes
+                    value={newCategoryColor} 
+                    onChange={(e) => setNewCategoryColor(e.target.value)} 
                     className="w-full p-2 mt-2 bg-[#22242b] text-white border border-white rounded-lg"
                   />
                 </div>
 
-                {/* Buttons for Save Category and Save Color */}
                 <div className="mt-4 flex justify-between">
-                  {/* Save Category button aligned to the left */}
                   <button
                     type="submit"
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg"
@@ -795,13 +766,10 @@ const Modal = ({
                     {isEditingCategory ? "Update Category" : "Save Category"}
                   </button>
 
-                  {/* Save Color button aligned to the right */}
                   <button
                     type="button"
                     onClick={() => {
-                      // Log the selected color to confirm it is being applied correctly
                       console.log("Selected color:", newCategoryColor);
-                      // No additional action needed here since color is automatically updated
                     }}
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg"
                   >
@@ -843,7 +811,6 @@ const Modal = ({
                 </div>
               ))}
             </div>
-            {/* Render the delete confirmation modal */}
             {showDeleteConfirm && renderDeleteConfirm()}
           </div>
         )}

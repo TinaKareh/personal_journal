@@ -1,3 +1,152 @@
+/**
+ * @swagger
+ * /api/category:
+ *   get:
+ *     summary: Get all categories for the authenticated user
+ *     description: Retrieve a list of categories for the authenticated user, including default categories and user-specific ones.
+ *     tags: [Category]
+ *     responses:
+ *       200:
+ *         description: A list of categories for the authenticated user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   name:
+ *                     type: string
+ *                   color:
+ *                     type: string
+ *                   deletionStatus:
+ *                     type: string
+ *                   userId:
+ *                     type: integer
+ *       401:
+ *         description: Unauthorized access (missing or invalid JWT token)
+ *       500:
+ *         description: Error fetching categories
+ *   
+ *   post:
+ *     summary: Create a new category
+ *     description: Create a new category for the authenticated user.
+ *     tags: [Category]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               color:
+ *                 type: string
+ *               deletionStatus:
+ *                 type: string
+ *                 default: "NOT_DELETED"
+ *     responses:
+ *       201:
+ *         description: Category created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 name:
+ *                   type: string
+ *                 color:
+ *                   type: string
+ *                 deletionStatus:
+ *                   type: string
+ *                 userId:
+ *                   type: integer
+ *       400:
+ *         description: Missing required fields (name or color)
+ *       500:
+ *         description: Error creating category
+ *   
+ *   put:
+ *     summary: Update an existing category
+ *     description: Update the name, color, or deletion status of an existing category.
+ *     tags: [Category]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *               name:
+ *                 type: string
+ *               color:
+ *                 type: string
+ *               deletionStatus:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Category updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 updated:
+ *                   type: integer
+ *                   description: Number of categories updated
+ *       400:
+ *         description: Category ID is required or invalid input
+ *       500:
+ *         description: Error updating category
+ *   
+ *   delete:
+ *     summary: Delete a category
+ *     description: Delete a category by its ID.
+ *     tags: [Category]
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         description: The ID of the category to delete
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Category deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 deleted:
+ *                   type: integer
+ *                   description: Number of categories deleted
+ *       400:
+ *         description: Category ID is required
+ *       500:
+ *         description: Error deleting category
+ *   
+ * components:
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+
 import { PrismaClient } from '@prisma/client';
 import { verify } from 'jsonwebtoken';
 
@@ -36,7 +185,7 @@ export default async function handler(req, res) {
 
         return res.status(200).json(categories);
       } catch (err) {
-        console.error('❌ Error fetching categories:', err);
+        console.error('Error fetching categories:', err);
         return res.status(500).json({ error: 'Error fetching categories' });
       }
     }

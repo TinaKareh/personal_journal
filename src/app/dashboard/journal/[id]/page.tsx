@@ -83,7 +83,6 @@ export default function JournalDetailPage() {
   return (
     <div className="bg-[#0E0F1C] min-h-screen text-white px-6 py-10">
       <div className="flex justify-between items-center mb-6 px-2 sm:px-4 md:px-6 lg:px-8">
-        {/* Back Link */}
         <button
           onClick={() => router.push("/dashboard")}
           className="flex items-center text-white hover:underline text-l gap-1"

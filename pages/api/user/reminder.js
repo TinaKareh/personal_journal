@@ -1,3 +1,154 @@
+/**
+ * @swagger
+ * /api/user/reminder:
+ *   get:
+ *     summary: Get all reminders for the authenticated user
+ *     description: Fetches all the reminders for the authenticated user, including their types and times, formatted for frontend.
+ *     tags: [Reminders]
+ *     responses:
+ *       200:
+ *         description: Successfully fetched all reminders for the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                     description: The unique identifier of the reminder
+ *                   type:
+ *                     type: string
+ *                     description: The type of the reminder (formatted for frontend)
+ *                   time:
+ *                     type: string
+ *                     description: The time of the reminder formatted as "hh:mm AM/PM"
+ *                   day:
+ *                     type: string
+ *                     description: The day on which the reminder is set
+ *                     example: "Monday"
+ *                   deletionStatus:
+ *                     type: string
+ *                     description: The deletion status of the reminder (e.g., "NOT_DELETED")
+ *       401:
+ *         description: Unauthorized access (missing or invalid JWT token)
+ *       500:
+ *         description: Internal server error
+ *
+ *   post:
+ *     summary: Create new reminders for the authenticated user
+ *     description: Creates new reminders for the authenticated user. A reminder can be created for multiple days at once.
+ *     tags: [Reminders]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               type:
+ *                 type: string
+ *                 description: The type of the reminder ("Gentle", "Passive Aggressive", "Nonchalant")
+ *                 example: "Gentle"
+ *               time:
+ *                 type: string
+ *                 description: The time of the reminder in 24-hour format (HH:mm)
+ *                 example: "09:00"
+ *               days:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: The days on which the reminder should be active
+ *                 example: ["Monday", "Wednesday"]
+ *               deletionStatus:
+ *                 type: string
+ *                 description: The deletion status of the reminder (defaults to "NOT_DELETED")
+ *                 example: "NOT_DELETED"
+ *     responses:
+ *       201:
+ *         description: Successfully created new reminders
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *       400:
+ *         description: Missing required fields (type, time, and days)
+ *       500:
+ *         description: Internal server error
+ *
+ *   put:
+ *     summary: Update existing reminders for the authenticated user
+ *     description: Updates the reminders for the authenticated user. A reminder can be updated or deleted based on the number of days and IDs provided.
+ *     tags: [Reminders]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               ids:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *                 description: List of reminder IDs to update
+ *               type:
+ *                 type: string
+ *                 description: The type of the reminder ("Gentle", "Passive Aggressive", "Nonchalant")
+ *               time:
+ *                 type: string
+ *                 description: The time of the reminder in 24-hour format (HH:mm)
+ *               days:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: The updated days on which the reminder should be active
+ *               deletionStatus:
+ *                 type: string
+ *                 description: The deletion status of the reminder
+ *     responses:
+ *       200:
+ *         description: Successfully updated the reminders
+ *       400:
+ *         description: Missing required fields or invalid input
+ *       500:
+ *         description: Internal server error
+ *
+ *   delete:
+ *     summary: Delete reminders for the authenticated user
+ *     description: Deletes one or more reminders for the authenticated user based on provided IDs.
+ *     tags: [Reminders]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               ids:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *                 description: List of reminder IDs to delete
+ *     responses:
+ *       200:
+ *         description: Successfully deleted reminders
+ *       400:
+ *         description: List of IDs is required
+ *       500:
+ *         description: Internal server error
+ *
+ * components:
+ *   securitySchemes:
+ *     BearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ */
+
 import { PrismaClient } from "@prisma/client";
 import { verify } from "jsonwebtoken";
 
@@ -110,17 +261,23 @@ export default async function handler(req, res) {
 
     //Update reminder
     case "PUT": {
-      const { ids, type, time, days, deletionStatus = "NOT_DELETED" } = req.body;
-    
+      const {
+        ids,
+        type,
+        time,
+        days,
+        deletionStatus = "NOT_DELETED",
+      } = req.body;
+
       if (!ids || !Array.isArray(ids) || ids.length === 0) {
         return res.status(400).json({ error: "List of IDs is required" });
       }
       if (!days || !Array.isArray(days) || days.length === 0) {
         return res.status(400).json({ error: "List of days is required" });
       }
-    
+
       const parsedType = parseReminderTypeFromFrontend(type);
-    
+
       try {
         // Case 1: If the number of days is equal to the number of ids
         if (days.length === ids.length) {
@@ -135,11 +292,12 @@ export default async function handler(req, res) {
               },
             });
           });
-    
+
           await Promise.all(updatePromises); // Update all reminders
-          return res.status(200).json({ success: true, message: "Reminders updated" });
-    
-        } 
+          return res
+            .status(200)
+            .json({ success: true, message: "Reminders updated" });
+        }
         // Case 2: If the number of days is less than the number of ids
         else if (days.length < ids.length) {
           const updatePromises = days.map((day, index) => {
@@ -153,15 +311,20 @@ export default async function handler(req, res) {
               },
             });
           });
-    
+
           const deleteIds = ids.slice(days.length); // Delete extra reminders
           await Promise.all(updatePromises); // Update the remaining reminders
           await prisma.reminder.deleteMany({
             where: { id: { in: deleteIds } },
           });
-    
-          return res.status(200).json({ success: true, message: "Reminders updated and extra ones deleted" });
-        } 
+
+          return res
+            .status(200)
+            .json({
+              success: true,
+              message: "Reminders updated and extra ones deleted",
+            });
+        }
         // Case 3: If the number of days is more than the number of ids
         else {
           const updatePromises = ids.map((id, index) => {
@@ -175,9 +338,9 @@ export default async function handler(req, res) {
               },
             });
           });
-    
+
           await Promise.all(updatePromises); // Update the existing reminders
-    
+
           // Create new reminders for the remaining days
           const newDays = days.slice(ids.length); // Get the remaining days
           const createPromises = newDays.map((day) => {
@@ -191,16 +354,20 @@ export default async function handler(req, res) {
               },
             });
           });
-    
+
           await Promise.all(createPromises); // Create new reminders
-          return res.status(200).json({ success: true, message: "Reminders updated and new ones created" });
+          return res
+            .status(200)
+            .json({
+              success: true,
+              message: "Reminders updated and new ones created",
+            });
         }
       } catch (err) {
         console.error(err);
         return res.status(500).json({ error: "Failed to update reminders" });
       }
     }
-    
 
     // Delete reminders
     case "DELETE": {

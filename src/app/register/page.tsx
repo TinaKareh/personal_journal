@@ -80,7 +80,6 @@ const SignUp = () => {
 
   return (
     <div className="bg-[#0E0F1C] text-white min-h-screen">
-      {/* Navbar */}
       <nav className="flex justify-between items-center p-6">
         <h1 className="text-2xl sm:text-4xl font-semibold">
           Journal me <span className="text-green-500">●</span>
@@ -92,7 +91,6 @@ const SignUp = () => {
             Your stories <span className="text-blue-400">start here</span>
           </h2>
 
-          {/* Success & Error Messages */}
           {successMsg && (
             <div className="mb-4 text-green-400 text-center font-medium">
               {successMsg}
@@ -101,7 +99,6 @@ const SignUp = () => {
 
           <form onSubmit={handleSubmit}>
             <div className="space-y-4">
-              {/* First Name */}
               <div>
                 <label
                   htmlFor="firstName"
@@ -120,7 +117,6 @@ const SignUp = () => {
                 />
               </div>
 
-              {/* Last Name */}
               <div>
                 <label htmlFor="lastName" className="block text-sm font-medium">
                   Last Name
@@ -136,7 +132,6 @@ const SignUp = () => {
                 />
               </div>
 
-              {/* Email Address */}
               <div>
                 <label htmlFor="email" className="block text-sm font-medium">
                   Email Address
@@ -152,7 +147,6 @@ const SignUp = () => {
                 />
               </div>
 
-              {/* Password */}
               <div>
                 <label htmlFor="password" className="block text-sm font-medium">
                   Password
@@ -174,7 +168,6 @@ const SignUp = () => {
                 </div>
               )}
 
-              {/* Create Account Button */}
               <button
                 type="submit"
                 className="w-full py-3 mt-6 bg-blue-600 text-white rounded-md font-semibold hover:bg-blue-700 transition-colors"
@@ -184,7 +177,6 @@ const SignUp = () => {
             </div>
           </form>
 
-          {/* Login Link */}
           <p className="mt-4 text-center text-sm text-gray-400">
             Have an account?{" "}
             <a href="/login" className="text-blue-400 hover:underline">

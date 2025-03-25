@@ -1,5 +1,73 @@
-// pages/api/register.js
-
+/**
+ * @swagger
+ * /api/auth/register:
+ *   post:
+ *     summary: User registration
+ *     description: Registers a new user by creating an account with the provided details.
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *                 description: The user's first name
+ *                 example: "John"
+ *               lastName:
+ *                 type: string
+ *                 description: The user's last name
+ *                 example: "Doe"
+ *               email:
+ *                 type: string
+ *                 description: The user's email address
+ *                 example: "john.doe@example.com"
+ *               password:
+ *                 type: string
+ *                 description: The user's password
+ *                 example: "password123"
+ *               role:
+ *                 type: string
+ *                 description: The role of the user, defaults to "USER"
+ *                 example: "USER"
+ *               gender:
+ *                 type: string
+ *                 description: The user's gender, defaults to "OTHER"
+ *                 example: "MALE"
+ *               dateOfBirth:
+ *                 type: string
+ *                 format: date
+ *                 description: The user's date of birth, defaults to "1970-01-01"
+ *                 example: "1990-05-15"
+ *     responses:
+ *       201:
+ *         description: User successfully created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "User created successfully"
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 1
+ *                     email:
+ *                       type: string
+ *                       example: "john.doe@example.com"
+ *       400:
+ *         description: Missing required fields (firstName, lastName, email, password)
+ *       409:
+ *         description: Conflict - Email is already registered
+ *       500:
+ *         description: Internal server error
+ */
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
