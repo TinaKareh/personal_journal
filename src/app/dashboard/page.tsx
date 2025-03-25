@@ -17,7 +17,7 @@ type Entry = {
   };
 };
 
-const Dashboard = () => {
+const Dashboard = ({ selectedDate }: { selectedDate: string }) => {
   const [loading, setLoading] = useState(true);
   const [entries, setEntries] = useState<Entry[]>([]);
 
@@ -295,7 +295,7 @@ const Dashboard = () => {
       <section>
         {loading ? (
           <div className="flex justify-center items-center">
-            <Image src="/loading.svg" alt="Loading" width={50} height={50} />
+            {/* <Image src="/loading.svg" alt="Loading" width={50} height={50} /> */}
           </div>
         ) : entries.length === 0 ? (
           <div className="flex flex-col items-center justify-center text-center">

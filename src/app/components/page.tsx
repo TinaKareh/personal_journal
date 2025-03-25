@@ -13,13 +13,13 @@ const Modal = ({
   onClose: () => void;
 }) => {
   const [activeTab, setActiveTab] = useState("personalDetails");
-  const [isEditing, setIsEditing] = useState(false); 
-  const [isAddingReminder, setIsAddingReminder] = useState(false); 
+  const [isEditing, setIsEditing] = useState(false);
+  const [isAddingReminder, setIsAddingReminder] = useState(false);
   const [reminderTime, setReminderTime] = useState<string>("");
-  const [reminderType, setReminderType] = useState<string>("GENTLE"); 
-  const [selectedDays, setSelectedDays] = useState<string[]>([]); 
-  const [selectedIds, setSelectedIds] = useState<number[]>([]); 
-  const [editingReminder, setEditingReminder] = useState<number[] | null>(null); 
+  const [reminderType, setReminderType] = useState<string>("GENTLE");
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [editingReminder, setEditingReminder] = useState<number[] | null>(null);
   const [categories, setCategories] = useState<any[]>([]);
   const [newCategoryName, setNewCategoryName] = useState<string>("");
   const [newCategoryColor, setNewCategoryColor] = useState<string>("#000000");
@@ -31,8 +31,7 @@ const Modal = ({
   const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null);
   const [showReminderDeleteConfirm, setReminderShowDeleteConfirm] =
     useState(false);
-  const [reminderToDelete, setReminderToDelete] = useState<number | null>(null);
-  const [isAddingCategory, setIsAddingCategory] = useState(false); 
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [selectedReminderIds, setSelectedReminderIds] = useState<number[]>([]);
   const router = useRouter();
 
@@ -61,7 +60,7 @@ const Modal = ({
   };
 
   type GroupedReminders = {
-    [key: string]: Reminder[]; 
+    [key: string]: Reminder[];
   };
 
   const [reminders, setReminders] = useState<Reminder[]>([]);
@@ -98,7 +97,7 @@ const Modal = ({
     }
   }, [isOpen]);
 
-  if (!isOpen) return null; 
+  if (!isOpen) return null;
 
   const handleDayChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = e.target;
@@ -178,15 +177,33 @@ const Modal = ({
     }
   };
 
+  const convertTo24HourFormat = (time12hr: string): string => {
+    const [time, modifier] = time12hr.split(" ");
+    let [hours, minutes] = time.split(":");
+    if (modifier === "PM" && hours !== "12") {
+      hours = (parseInt(hours) + 12).toString();
+    }
+    if (modifier === "AM" && hours === "12") {
+      hours = "00";
+    }
+    return `${hours}:${minutes}`;
+  };
+
   const handleEditReminder = (
     ids: number[],
     type: string,
     time: string,
     days: string[]
   ) => {
+    console.log("type", type);
+    console.log("time", time);
+
+    const time24hr = convertTo24HourFormat(time);
+    console.log("time24hr", time24hr);
+
     setEditingReminder(ids);
     setSelectedIds(ids);
-    setReminderTime(time);
+    setReminderTime(time24hr);
     setReminderType(type);
     setSelectedDays(days);
     setIsAddingReminder(true);
@@ -198,19 +215,20 @@ const Modal = ({
   };
 
   const handleDeleteReminders = async () => {
-    if (selectedReminderIds.length === 0) return;
+    console.log("selectedReminderIds", selectedReminderIds);
+    //if (selectedReminderIds.length === 0) return;
 
     try {
       const res = await fetch(`/api/user/reminder`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: selectedReminderIds }), 
+        body: JSON.stringify({ ids: selectedReminderIds }),
       });
 
       if (res.ok) {
         setReminders((prev) =>
           prev.filter((r) => !selectedReminderIds.includes(r.id))
-        ); 
+        );
         setReminderShowDeleteConfirm(false);
         setSelectedReminderIds([]);
       } else {
@@ -273,8 +291,8 @@ const Modal = ({
     setEditingCategoryId(category.id);
     setNewCategoryName(category.name);
     setNewCategoryColor(category.color);
-    setIsEditingCategory(true); 
-    setIsAddingCategory(true); 
+    setIsEditingCategory(true);
+    setIsAddingCategory(true);
   };
 
   const handleDeleteCategory = async () => {
@@ -332,7 +350,7 @@ const Modal = ({
       });
 
       if (res.ok) {
-        setIsEditing(false); 
+        setIsEditing(false);
       } else {
         console.error("Update failed");
       }
@@ -343,11 +361,11 @@ const Modal = ({
 
   const groupReminders = (reminders: Reminder[]): GroupedReminders => {
     return reminders.reduce((acc: GroupedReminders, reminder: Reminder) => {
-      const key = `${reminder.time}|${reminder.type}`; 
+      const key = `${reminder.time}|${reminder.type}`;
       if (!acc[key]) {
         acc[key] = [];
       }
-      acc[key].push(reminder); 
+      acc[key].push(reminder);
       return acc;
     }, {});
   };
@@ -383,7 +401,7 @@ const Modal = ({
       </p>
       <div className="flex justify-between mt-4">
         <button
-          onClick={() => handleDeleteReminders}
+          onClick={handleDeleteReminders}
           className="bg-red-600 text-white px-4 py-1 rounded-md text-sm"
         >
           Yes delete
@@ -461,7 +479,7 @@ const Modal = ({
               <div>
                 <button
                   className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                  onClick={() => setIsEditing((prev) => !prev)} 
+                  onClick={() => setIsEditing((prev) => !prev)}
                 >
                   {isEditing ? "Cancel" : "Edit personal details"}
                 </button>
@@ -480,7 +498,7 @@ const Modal = ({
                       }
                       className="w-full p-2 mt-2 bg-[#22242b] text-white border border-white rounded-lg"
                       placeholder="First name"
-                      disabled={!isEditing} 
+                      disabled={!isEditing}
                     />
                   </div>
 
@@ -540,7 +558,7 @@ const Modal = ({
                   className={`w-1/4 p-2 mt-4 ${
                     isEditing ? "bg-blue-600" : "bg-gray-600"
                   } text-white rounded-lg`}
-                  disabled={!isEditing} 
+                  disabled={!isEditing}
                 >
                   Save changes
                 </button>
@@ -563,7 +581,7 @@ const Modal = ({
                   {" "}
                   <button
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-[200px]"
-                    onClick={() => setIsAddingReminder(true)} 
+                    onClick={() => setIsAddingReminder(true)}
                   >
                     Add a reminder
                   </button>
@@ -574,7 +592,7 @@ const Modal = ({
                 <div className="flex items-center gap-4">
                   {" "}
                   <button
-                    onClick={() => setIsAddingReminder(false)} 
+                    onClick={() => setIsAddingReminder(false)}
                     className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 w-[200px]" // Same width as the Add button
                   >
                     Cancel
@@ -606,7 +624,7 @@ const Modal = ({
                           <button
                             onClick={() =>
                               handleEditReminder(ids, type, time, day)
-                            } 
+                            }
                             className="text-white-500 flex items-center"
                           >
                             <PencilIcon className="h-5 w-5 mr-2" />
@@ -626,7 +644,7 @@ const Modal = ({
                 ) : (
                   <div className="flex flex-col items-center justify-center text-center">
                     <Image
-                      src="/images/reminder.png" 
+                      src="/images/reminder.png"
                       alt="Reminder"
                       width={200}
                       height={200}
@@ -642,7 +660,6 @@ const Modal = ({
               </ul>
             )}
 
-            
             {isAddingReminder && (
               <form onSubmit={handleAddOrUpdateReminder}>
                 <div className="flex mb-4">
@@ -670,7 +687,7 @@ const Modal = ({
                         className="w-full p-2 mt-2 bg-[#22242b] text-white border border-white rounded-lg"
                       >
                         <option value="Gentle">Gentle</option>
-                        <option value="Passive Aggressive">
+                        <option value="Passive aggressive">
                           Passive Aggressive
                         </option>
                         <option value="Nonchalant">Nonchalant</option>
@@ -743,7 +760,7 @@ const Modal = ({
                   <input
                     type="text"
                     value={newCategoryName}
-                    onChange={(e) => setNewCategoryName(e.target.value)} 
+                    onChange={(e) => setNewCategoryName(e.target.value)}
                     className="w-full p-2 mt-2 bg-[#22242b] text-white border border-white rounded-lg"
                   />
                 </div>
@@ -752,8 +769,8 @@ const Modal = ({
                   <label className="text-white">Category Color</label>
                   <input
                     type="color"
-                    value={newCategoryColor} 
-                    onChange={(e) => setNewCategoryColor(e.target.value)} 
+                    value={newCategoryColor}
+                    onChange={(e) => setNewCategoryColor(e.target.value)}
                     className="w-full p-2 mt-2 bg-[#22242b] text-white border border-white rounded-lg"
                   />
                 </div>

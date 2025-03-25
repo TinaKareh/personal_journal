@@ -8,20 +8,28 @@ const TravelModal = ({
   isOpen,
   onClose,
   journalEntries,
+  onDateSelect,
 }: {
   isOpen: boolean;
   onClose: () => void;
   journalEntries: string[];
+  onDateSelect: (date: string) => void;
 }) => {
   const [date, setDate] = useState<Value>(new Date()); 
+
 
   const disableFutureDates = ({ date }: { date: Date }) => {
     const today = new Date();
     return date > today; 
   };
 
+  const normalizeDate = (date: Date) => {
+    const localDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    return localDate.toISOString().split('T')[0]; 
+  };
+
   const tileClassName = ({ date }: { date: Date }) => {
-    const formattedDate = date.toISOString().split("T")[0]; 
+    const formattedDate = normalizeDate(date);
     return journalEntries.some((entry) => entry === formattedDate)
       ? "highlight"
       : ""; 
@@ -29,12 +37,13 @@ const TravelModal = ({
 
   const handleDateChange = (value: Value) => {
     setDate(value);
+    onDateSelect(normalizeDate(value as Date));
   };
 
   if (!isOpen) return null; 
 
   return (
-    <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
+    <div className="fixed top-16 right-80 bg-opacity-50 flex justify-center items-start z-50">
       <div className="bg-[#1a1c29] p-6 rounded-lg w-[400px] h-[400px] relative">
         <div className="flex justify-between items-center mb-6">
           <div className="flex flex-col items-start">

@@ -43,6 +43,10 @@ export default function RootLayout({
   const [isInsightsModalOpen, setIsInsightsModalOpen] = useState(false); 
   const [isTimeTravelModalOpen, setIsTimeTravelModalOpen] = useState(false); 
   const buttonRef = useRef(null); 
+  const buttonnRef = useRef(null); 
+  const [selectedDate, setSelectedDate] = useState<string>("");
+
+
 
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   
@@ -89,13 +93,25 @@ export default function RootLayout({
     }
   };
 
-  const journalEntries = [
-    "2025-03-02",
-    "2025-03-06",
-    "2025-03-12",
-    "2025-03-17",
-    "2025-03-24"
-  ];
+  const [journalEntries, setJournalEntries] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchJournalEntries = async () => {
+      try {
+        const res = await fetch("/api/journal/date");
+        const data = await res.json();
+        setJournalEntries(data);
+      } catch (error) {
+        console.error("Error fetching journal entries:", error);
+      }
+    };
+
+    fetchJournalEntries();
+  }, []); 
+
+  const handleDateSelect = (date: string) => {
+    setSelectedDate(date); 
+  };
 
   return (
     <div className="bg-[#0E0F1C] text-white min-h-screen">
@@ -107,7 +123,7 @@ export default function RootLayout({
           <button
             className="bg-gray-800 text-white px-4 py-2 rounded-lg flex items-center gap-2"
             onClick={handleOpenTimeTravelModal}
-            ref={buttonRef}
+            ref = {buttonnRef}
           >
             <CalendarDaysIcon className="w-5 h-5 text-blue-400" />
             Time travel
@@ -115,6 +131,7 @@ export default function RootLayout({
           <button
             className="bg-gray-800 text-white px-4 py-2 rounded-lg flex items-center gap-2"
             onClick={handleOpenInsightsModal}
+            ref={buttonRef}
           >
             <ChartBarIcon className="w-5 h-5 text-purple-400" />
             Insights
@@ -163,6 +180,7 @@ export default function RootLayout({
         isOpen={isTimeTravelModalOpen}
         onClose={handleCloseTimeTravelModal}
         journalEntries={journalEntries} 
+        onDateSelect={handleDateSelect}
       />
     </div>
   );

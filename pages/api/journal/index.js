@@ -289,15 +289,20 @@ export default async function handler(req, res) {
     // Update an existing entry
     case "PUT": {
       const { id, title, content, categoryId } = req.body;
-
+    
       const updated = await prisma.journalEntry.update({
         where: { id: parseInt(id) },
-        data: { title, content, categoryId },
+        data: {
+          title,
+          content,
+          ...(categoryId && { category: { connect: { id: categoryId } } }) 
+        },
         include: { category: true },
       });
-
+    
       return res.status(200).json(updated);
     }
+    
 
     // Delete an entry by ID
     case "DELETE": {
