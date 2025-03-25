@@ -53,7 +53,7 @@ const InsightsModal = ({
             <h2 className="text-l text-white">See your writing trends.</h2>
           </div>
           <button className="text-white" onClick={onClose}>
-            ×
+            X
           </button>
         </div>
 

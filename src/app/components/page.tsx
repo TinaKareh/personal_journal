@@ -14,9 +14,7 @@ const Modal = ({
 }) => {
   const [activeTab, setActiveTab] = useState("personalDetails");
   const [isEditing, setIsEditing] = useState(false); // State for editing personal details
-  const [newReminder, setNewReminder] = useState(""); // State for new reminder input
   const [isAddingReminder, setIsAddingReminder] = useState(false); // State to toggle the reminder form
-  const [isEditingPreferences, setIsEditingPreferences] = useState(false); // State to toggle preferences editing
   const [reminderTime, setReminderTime] = useState<string>(""); // for time input
   const [reminderType, setReminderType] = useState<string>("GENTLE"); // for the type select dropdown
   const [selectedDays, setSelectedDays] = useState<string[]>([]); // for the days checkboxes
@@ -31,7 +29,11 @@ const Modal = ({
   );
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState<number | null>(null);
-
+  const [showReminderDeleteConfirm, setReminderShowDeleteConfirm] =
+    useState(false);
+  const [reminderToDelete, setReminderToDelete] = useState<number | null>(null);
+  const [isAddingCategory, setIsAddingCategory] = useState(false); // State to toggle the category form
+  const [selectedReminderIds, setSelectedReminderIds] = useState<number[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -105,47 +107,11 @@ const Modal = ({
     );
   };
 
-  const handleAddReminder = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Create payload with current form field values
-    const payload = {
-      time: reminderTime,
-      type: reminderType,
-      days: selectedDays, // pass selected days from the checkboxes
-    };
-
-    try {
-      const res = await fetch("/api/user/reminder", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (res.ok) {
-        const newReminders = await res.json(); // Getting array of reminders
-
-        // Check the structure of the data
-        console.log("New reminders received:", newReminders);
-
-        // Check if the data is correct and matches the expected format
-        // Add reminders one by one to ensure they are handled properly
-        setReminders((prev) => [
-          ...prev,
-          ...newReminders.map((reminder: any) => ({
-            ...reminder,
-            time: new Date(reminder.time).toLocaleTimeString(), // Format time properly if needed
-            type: reminder.type || "", // Default to empty string if undefined
-          })),
-        ]);
-
-        setIsAddingReminder(false); // go back to list
-      } else {
-        console.error("Failed to add reminder");
-      }
-    } catch (err) {
-      console.error("Error adding reminder", err);
-    }
+  const resetReminderForm = () => {
+    setReminderTime("");
+    setReminderType("");
+    setSelectedDays([]);
+    setIsAddingReminder(false);
   };
 
   const handleAddOrUpdateReminder = async (e: React.FormEvent) => {
@@ -175,8 +141,9 @@ const Modal = ({
               reminder.id === updatedReminder.id ? updatedReminder : reminder
             )
           );
-          setEditingReminder(null); // Clear the editing reminder state
-          setIsAddingReminder(false); // Close the form
+          setEditingReminder(null);
+          setIsAddingReminder(false);
+          resetReminderForm();
         }
       } else {
         // If adding a new reminder
@@ -187,9 +154,23 @@ const Modal = ({
         });
 
         if (res.ok) {
-          const newReminder = await res.json();
-          setReminders((prev) => [...prev, newReminder]);
-          setIsAddingReminder(false); // Close the form
+          const newReminders = await res.json(); // Getting array of reminders
+
+          // Check the structure of the data
+          console.log("New reminders received:", newReminders);
+
+          // Check if the data is correct and matches the expected format
+          // Add reminders one by one to ensure they are handled properly
+          setReminders((prev) => [
+            ...prev,
+            ...newReminders.map((reminder: any) => ({
+              ...reminder,
+              time: new Date(reminder.time).toLocaleTimeString(), // Format time properly if needed
+              type: reminder.type || "", // Default to empty string if undefined
+            })),
+          ]);
+
+          resetReminderForm();
         }
       }
     } catch (err) {
@@ -211,16 +192,27 @@ const Modal = ({
     setIsAddingReminder(true);
   };
 
-  const handleDeleteReminders = async (ids: number[]) => {
+  const handleDeleteReminderClick = (ids: number[]) => {
+    setSelectedReminderIds(ids);
+    setReminderShowDeleteConfirm(true);
+  };
+
+  const handleDeleteReminders = async () => {
+    if (selectedReminderIds.length === 0) return;
+
     try {
       const res = await fetch(`/api/user/reminder`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids }), // Send the list of ids in the request body
+        body: JSON.stringify({ ids: selectedReminderIds }), // Send the list of ids in the request body
       });
 
       if (res.ok) {
-        setReminders((prev) => prev.filter((r) => !ids.includes(r.id))); // Remove deleted reminders from the list
+        setReminders((prev) =>
+          prev.filter((r) => !selectedReminderIds.includes(r.id))
+        ); // Remove deleted reminders from the list
+        setReminderShowDeleteConfirm(false);
+        setSelectedReminderIds([]);
       } else {
         console.error("Failed to delete reminders");
       }
@@ -229,37 +221,9 @@ const Modal = ({
     }
   };
 
-  const handleAddCategory = async (e: React.FormEvent) => {
+  const handleSaveCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCategoryName) return;
-
-    const payload = {
-      name: newCategoryName,
-      color: newCategoryColor,
-    };
-
-    try {
-      const res = await fetch("/api/category", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (res.ok) {
-        const newCategory = await res.json();
-        setCategories((prev) => [...prev, newCategory]);
-        resetCategoryForm();
-      } else {
-        console.error("Failed to add category");
-      }
-    } catch (err) {
-      console.error("Error adding category", err);
-    }
-  };
-
-  const handleEditCategory = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingCategoryId || !newCategoryName) return;
 
     const payload = {
       id: editingCategoryId,
@@ -268,33 +232,57 @@ const Modal = ({
     };
 
     try {
-      const res = await fetch(`/api/category/${editingCategoryId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      if (isEditingCategory) {
+        // Update category if editing
+        const res = await fetch(`/api/category`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
 
-      if (res.ok) {
-        const updatedCategory = await res.json();
-        setCategories((prev) =>
-          prev.map((cat) =>
-            cat.id === updatedCategory.id ? updatedCategory : cat
-          )
-        );
-        resetCategoryForm();
+        if (res.ok) {
+          const updatedCategory = await res.json();
+          setCategories((prev) =>
+            prev.map((cat) =>
+              cat.id === updatedCategory.id ? updatedCategory : cat
+            )
+          );
+          resetCategoryForm();
+        }
       } else {
-        console.error("Failed to update category");
+        const res = await fetch("/api/category", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          const newCategory = await res.json();
+          setCategories((prev) => [...prev, newCategory]);
+
+          resetCategoryForm();
+        } else {
+          console.error("Failed to add category");
+        }
       }
     } catch (err) {
-      console.error("Error updating category", err);
+      console.error("Error adding category", err);
     }
+  };
+
+  const handleEditCategory = (category: any) => {
+    setEditingCategoryId(category.id);
+    setNewCategoryName(category.name);
+    setNewCategoryColor(category.color);
+    setIsEditingCategory(true); // Switch to edit mode
+    setIsAddingCategory(true); // Show form for editing
   };
 
   const handleDeleteCategory = async () => {
     if (!categoryToDelete) return;
 
     try {
-      const res = await fetch(`/api/category/${categoryToDelete}`, {
+      const res = await fetch(`/api/category?id=${categoryToDelete}`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -313,16 +301,14 @@ const Modal = ({
     }
   };
 
-  const handleCancelEdit = () => {
-    resetCategoryForm();
-    setIsEditingCategory(false);
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setCategoryToDelete(null);
   };
 
-  const handleEditClick = (category: any) => {
-    setNewCategoryName(category.name);
-    setNewCategoryColor(category.color);
-    setEditingCategoryId(category.id);
-    setIsEditingCategory(true);
+  const handleReminderCancelDelete = () => {
+    setReminderShowDeleteConfirm(false);
+    setSelectedReminderIds([]);
   };
 
   const handleDeleteClick = (categoryId: number) => {
@@ -333,8 +319,7 @@ const Modal = ({
   const resetCategoryForm = () => {
     setNewCategoryName("");
     setNewCategoryColor("#000000");
-    setIsEditingCategory(false);
-    setEditingCategoryId(null);
+    setIsAddingCategory(false);
   };
 
   const handleSaveChanges = async (e: React.FormEvent) => {
@@ -371,6 +356,51 @@ const Modal = ({
   // Group the reminders when data is fetched
   const groupedReminders = groupReminders(reminders);
 
+  // Render modal for confirmation on deletion
+  const renderDeleteConfirm = () => (
+    <div className="absolute right-0 top-100 mt-2 bg-[#1a1c29] p-4 rounded-lg w-[300px] z-14">
+      <p className="text-white text-sm">
+        Are you sure you want to delete this category?
+      </p>
+      <div className="flex justify-between mt-4">
+        <button
+          onClick={handleDeleteCategory}
+          className="bg-red-600 text-white px-4 py-1 rounded-md text-sm"
+        >
+          Yes delete
+        </button>
+        <button
+          onClick={handleCancelDelete}
+          className="bg-blue-600 text-white px-4 py-1 rounded-md text-sm"
+        >
+          Keep category
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderReminderDeleteConfirm = () => (
+    <div className="absolute right-0 top-30 mt-2 bg-[#1a1c29] p-4 rounded-lg w-[300px] z-14">
+      <p className="text-white text-sm">
+        Are you sure you want to delete this reminder?
+      </p>
+      <div className="flex justify-between mt-4">
+        <button
+          onClick={() => handleDeleteReminders}
+          className="bg-red-600 text-white px-4 py-1 rounded-md text-sm"
+        >
+          Yes delete
+        </button>
+        <button
+          onClick={handleReminderCancelDelete}
+          className="bg-blue-600 text-white px-4 py-1 rounded-md text-sm"
+        >
+          Keep reminder
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
       {/* Modal Content */}
@@ -380,7 +410,7 @@ const Modal = ({
           onClick={onClose}
           className="absolute top-4 right-4 text-white text-xl"
         >
-          ×
+          X
         </button>
 
         <div className="flex flex-col mb-6">
@@ -584,6 +614,7 @@ const Modal = ({
                     const days = grouped.map((r) => r.day).join(", ");
                     const day = grouped.map((r) => r.day);
                     const ids = grouped.map((r) => r.id);
+                    // setSelectedReminderIds(ids);
 
                     return (
                       <li
@@ -606,7 +637,7 @@ const Modal = ({
                             Edit
                           </button>
                           <button
-                            onClick={() => handleDeleteReminders(ids)} // Delete reminder
+                            onClick={() => handleDeleteReminderClick(ids)} // Trigger delete confirmation modal
                             className="text-white-500 flex items-center"
                           >
                             <TrashIcon className="h-5 w-5 mr-2" />
@@ -709,10 +740,77 @@ const Modal = ({
                 </div>
               </form>
             )}
+            {showReminderDeleteConfirm && renderReminderDeleteConfirm()}
           </div>
         ) : (
           <div>
-            <h3 className="text-xl text-white">Manage Categories</h3>
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl text-white">Manage Categories</h3>
+              <button
+                onClick={() => {
+                  setIsAddingCategory((prev) => !prev);
+                  setNewCategoryName("");
+                  setNewCategoryColor("#000000");
+                }}
+                className={`${
+                  isAddingCategory ? "bg-gray-600" : "bg-blue-600"
+                } text-white px-4 py-2 rounded-lg hover:bg-opacity-80`}
+              >
+                {isAddingCategory ? "Cancel" : "Add Category"}
+              </button>
+            </div>
+
+            {/* Category Form */}
+            {isAddingCategory && (
+              <form onSubmit={handleSaveCategory}>
+                {/* Category Name Input */}
+                <div className="mt-4">
+                  <label className="text-white">Category Name</label>
+                  <input
+                    type="text"
+                    value={newCategoryName}
+                    onChange={(e) => setNewCategoryName(e.target.value)} // Handle text change
+                    className="w-full p-2 mt-2 bg-[#22242b] text-white border border-white rounded-lg"
+                  />
+                </div>
+
+                {/* Category Color Picker */}
+                <div className="mt-4">
+                  <label className="text-white">Category Color</label>
+                  <input
+                    type="color"
+                    value={newCategoryColor} // Bind this value to the state
+                    onChange={(e) => setNewCategoryColor(e.target.value)} // Update state when color changes
+                    className="w-full p-2 mt-2 bg-[#22242b] text-white border border-white rounded-lg"
+                  />
+                </div>
+
+                {/* Buttons for Save Category and Save Color */}
+                <div className="mt-4 flex justify-between">
+                  {/* Save Category button aligned to the left */}
+                  <button
+                    type="submit"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+                  >
+                    {isEditingCategory ? "Update Category" : "Save Category"}
+                  </button>
+
+                  {/* Save Color button aligned to the right */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      // Log the selected color to confirm it is being applied correctly
+                      console.log("Selected color:", newCategoryColor);
+                      // No additional action needed here since color is automatically updated
+                    }}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+                  >
+                    Save Color
+                  </button>
+                </div>
+              </form>
+            )}
+
             <div className="my-4">
               {categories.map((category) => (
                 <div key={category.id} className="flex justify-between mb-2">
@@ -723,104 +821,30 @@ const Modal = ({
                     />
                     <span>{category.name}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleEditClick(category)}
-                      className="text-white-500 flex items-center"
-                    >
-                      <PencilIcon className="h-5 w-5 mr-2" />{" "}
-                      {/* Add margin to the right of the icon */}
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeleteClick(category.id)}
-                      className="text-white-500 flex items-center"
-                    >
-                      <TrashIcon className="h-5 w-5 mr-2" />{" "}
-                      {/* Add margin to the right of the icon */}
-                      Delete
-                    </button>
-                  </div>
+
+                  {category.userId && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleEditCategory(category)}
+                        className="text-white-500 flex items-center"
+                      >
+                        <PencilIcon className="h-5 w-5 mr-2" />
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(category.id)}
+                        className="text-white-500 flex items-center"
+                      >
+                        <TrashIcon className="h-5 w-5 mr-2" />
+                        Delete
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
-
-            <button
-              onClick={() => setIsEditingCategory(false)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-            >
-              Add Category
-            </button>
-
-            {/* Category Form */}
-            {isEditingCategory && (
-              <form
-                onSubmit={
-                  isEditingCategory ? handleEditCategory : handleAddCategory
-                }
-              >
-                <div className="mt-4">
-                  <label className="text-white">Category Name</label>
-                  <input
-                    type="text"
-                    value={newCategoryName}
-                    onChange={(e) => setNewCategoryName(e.target.value)}
-                    className="w-full p-2 mt-2 bg-[#22242b] text-white border border-white rounded-lg"
-                  />
-                </div>
-                <div className="mt-4">
-                  <label className="text-white">Category Color</label>
-                  <input
-                    type="color"
-                    value={newCategoryColor}
-                    onChange={(e) => setNewCategoryColor(e.target.value)}
-                    className="w-full p-2 mt-2 bg-[#22242b] text-white border border-white rounded-lg"
-                  />
-                </div>
-                <div className="mt-4 flex gap-2">
-                  <button
-                    type="submit"
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-                  >
-                    {isEditingCategory ? "Save Changes" : "Add Category"}
-                  </button>
-                  {isEditingCategory && (
-                    <button
-                      type="button"
-                      onClick={handleCancelEdit}
-                      className="bg-gray-600 text-white px-4 py-2 rounded-lg"
-                    >
-                      Cancel
-                    </button>
-                  )}
-                </div>
-              </form>
-            )}
-
-            {/* Delete Confirmation */}
-            {showDeleteConfirm && (
-              <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50">
-                <div className="bg-[#1a1c29] p-8 rounded-lg w-[400px]">
-                  <p className="text-white">
-                    Are you sure you want to delete this category?
-                  </p>
-                  <div className="mt-4 flex justify-between">
-                    <button
-                      onClick={handleDeleteCategory}
-                      className="bg-red-600 text-white px-4 py-2 rounded-lg"
-                    >
-                      Yes, Delete
-                    </button>
-                    <button
-                      onClick={() => setShowDeleteConfirm(false)}
-                      className="bg-gray-600 text-white px-4 py-2 rounded-lg"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Render the delete confirmation modal */}
+            {showDeleteConfirm && renderDeleteConfirm()}
           </div>
         )}
       </div>

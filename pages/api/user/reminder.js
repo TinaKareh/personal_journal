@@ -94,7 +94,14 @@ export default async function handler(req, res) {
           })
         );
 
-        return res.status(201).json(reminders);
+        // Parse the reminder fields before returning the data
+        const formattedReminders = reminders.map((reminder) => ({
+          ...reminder,
+          type: formatReminderTypeForFrontend(reminder.type), // Format reminder type
+          time: formatTimeForFrontend(reminder.time), // Format time to AM/PM
+        }));
+
+        return res.status(201).json(formattedReminders);
       } catch (err) {
         console.error(err);
         return res.status(500).json({ error: "Failed to create reminder" });

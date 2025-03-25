@@ -116,7 +116,7 @@ const Dashboard = () => {
         setPage((prev) => prev + 1);
       }
     } catch (err) {
-      console.error("❌ Error loading more entries:", err);
+      console.error("Error loading more entries:", err);
     }
   };
 

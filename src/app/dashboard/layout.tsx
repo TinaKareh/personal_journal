@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import Modal from "../components/page";
 import InsightsModal from "../components/insights";
 import TravelModal from "../components/travel";
+import Dashboard from "../dashboard/page"; // Import the Dashboard
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -51,6 +52,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
 
+  const [categories, setCategories] = useState([]); // Categories state lifted here
   const username = useUsernameFromToken();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInsightsModalOpen, setIsInsightsModalOpen] = useState(false); // State for Insights Modal
@@ -58,6 +60,7 @@ export default function RootLayout({
   const buttonRef = useRef(null); // Reference for the Time Travel button
 
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -102,7 +105,13 @@ export default function RootLayout({
   };
 
   // Mock journal entries or pass an actual array of journal entry dates
-  const journalEntries = ["2024-03-10", "2024-03-12", "2024-03-15"];
+  const journalEntries = [
+    "2025-03-02",
+    "2025-03-06",
+    "2025-03-12",
+    "2025-03-17",
+    "2025-03-24"
+  ];
 
   return (
     <div className="bg-[#0E0F1C] text-white min-h-screen">
@@ -160,8 +169,9 @@ export default function RootLayout({
       </header>
       {/* Main Content */}
       <main>{children}</main>
+
       {/* Modal for Account Settings */}
-      <Modal isOpen={isModalOpen} onClose={handleCloseModal} />
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal}/>
 
       {/* Modal for Insights */}
       <InsightsModal

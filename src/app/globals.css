@@ -25,7 +25,67 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-.react-calendar__tile.highlight {
-  background-color: #4CAF50; /* Green background */
+/* Add this CSS to your project */
+
+/* Style for the highlighted dates */
+.highlight {
+  background-color: #4CAF50; /* Green background for highlighted dates */
   color: white;
 }
+
+/* Custom calendar styles */
+.calendar-custom .react-calendar__tile {
+  border-radius: 50%; /* Circular background for each day */
+  transition: background-color 0.2s ease; /* Smooth transition for hover effect */
+}
+
+.calendar-custom .react-calendar__tile--active {
+  background-color: #4CAF50; /* Active day background */
+  color: white;
+}
+
+.calendar-custom .react-calendar__tile--now {
+  background-color: #2196F3; /* Blue background for the current date */
+  color: white;
+}
+
+.calendar-custom .react-calendar__tile:hover {
+  background-color: #6abf69; /* Hover effect for the tiles */
+}
+
+/* Disable future dates (gray out) */
+.react-calendar__tile--disabled {
+  background-color: #f0f0f0;
+  color: #b0b0b0;
+  cursor: not-allowed;
+}
+
+/* Style for the month and year selection */
+.react-calendar__navigation button {
+  background-color: #1a1c29;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 5px 10px;
+}
+
+.react-calendar__navigation button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Adjust the layout and size of the calendar for better alignment */
+.react-calendar {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #333;
+}
+
+.react-calendar__month-view {
+  padding: 10px;
+}
+
+
+
+
+
